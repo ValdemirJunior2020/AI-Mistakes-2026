@@ -128,9 +128,20 @@ export default function Dashboard() {
                 <DatabaseZap className="h-4 w-4" />
                 HotelPlanner Management QA
               </div>
-              <h1 className="mt-5 max-w-5xl text-4xl font-black leading-tight tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-7xl">
-                AI Agent Mistakes Executive Dashboard
-              </h1>
+              <div className="mt-5 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+  <h1 className="max-w-5xl text-4xl font-black leading-tight tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-7xl">
+    AI Agent Mistakes Executive Dashboard
+  </h1>
+
+  <div className="w-fit rounded-3xl border border-red-300 bg-red-50 px-5 py-4 shadow-sm dark:border-red-500/30 dark:bg-red-500/10">
+    <p className="text-xs font-black uppercase tracking-[0.2em] text-red-500">
+      Report Period
+    </p>
+    <p className="mt-1 text-xl font-black text-slate-950 dark:text-white sm:text-2xl">
+      From Jan 5, 2026 to May 18, 2026
+    </p>
+  </div>
+</div>
               <p className="mt-4 max-w-4xl text-base font-semibold leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
                 Unified view of AI feedback, Buwelo AI mistakes, and 2026 reviews with clickable charts, executive KPIs, searchable raw data, and Excel export.
               </p>

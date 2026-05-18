@@ -3,26 +3,32 @@ import type { SourceFileName } from "@/types/qa";
 
 export const EXCEL_FILES: {
   name: SourceFileName;
-  displayName: string;
-  callCenter: string;
   path: string;
+  label: string;
+  callCenter: string;
+  dateRange: string;
+  dateNote?: string;
 }[] = [
   {
     name: "Reviews-2026.xlsx",
-    displayName: "Reviews 2026",
-    callCenter: "Mixed / Reviews",
-    path: "/data/Reviews-2026.xlsx"
+    path: "/data/Reviews-2026.xlsx",
+    label: "Reviews 2026",
+    callCenter: "Reviews / Mixed",
+    dateRange: "Jan 5, 2026 – May 18, 2026"
   },
   {
     name: "AI-MISTAKES-BUWELO (1).xlsx",
-    displayName: "Buwelo AI Mistakes",
+    path: "/data/AI-MISTAKES-BUWELO%20(1).xlsx",
+    label: "Buwelo AI Mistakes",
     callCenter: "Buwelo",
-    path: "/data/AI-MISTAKES-BUWELO%20(1).xlsx"
+    dateRange: "Apr 22, 2026 – May 14, 2026"
   },
   {
     name: "HP AI Feedback.xlsx",
-    displayName: "Concentrix feedbacks",
+    path: "/data/HP%20AI%20Feedback.xlsx",
+    label: "Concentrix feedbacks",
     callCenter: "Concentrix",
-    path: "/data/HP%20AI%20Feedback.xlsx"
+    dateRange: "Mar 2026 – May 13, 2026",
+    dateNote: "Excludes one old outlier date: Apr 22, 2023"
   }
 ];
