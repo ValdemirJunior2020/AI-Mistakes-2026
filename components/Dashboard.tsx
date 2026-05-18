@@ -48,25 +48,37 @@ export default function Dashboard() {
   const [loadError, setLoadError] = useState("");
   const [modal, setModal] = useState<{ title: string; records: QAErrorRecord[] } | null>(null);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-  }, [isDark]);
+// components/Dashboard.tsx
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setLoading(true);
-        const result = await loadAllExcelFiles();
-        setRecords(result.records);
-        setLoadedFiles(result.loadedFiles);
-      } catch (error) {
-        setLoadError(error instanceof Error ? error.message : "Could not load dashboard data.");
-      } finally {
-        setLoading(false);
-      }
+useEffect(() => {
+  if (isDark) {
+    document.documentElement.classList.add("dark");
+    document.documentElement.style.colorScheme = "dark";
+  } else {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.style.colorScheme = "light";
+  }
+}, [isDark]);
+
+useEffect(() => {
+  document.documentElement.classList.remove("dark");
+  document.documentElement.style.colorScheme = "light";
+
+  async function loadData() {
+    try {
+      setLoading(true);
+      const result = await loadAllExcelFiles();
+      setRecords(result.records);
+      setLoadedFiles(result.loadedFiles);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Could not load dashboard data.");
+    } finally {
+      setLoading(false);
     }
-    loadData();
-  }, []);
+  }
+
+  loadData();
+}, []);
 
   const agentData = useMemo(() => groupBy(records, "agentName").slice(0, 10), [records]);
   const allAgentData = useMemo(() => groupBy(records, "agentName"), [records]);

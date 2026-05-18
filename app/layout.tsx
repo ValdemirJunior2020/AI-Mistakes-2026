@@ -1,21 +1,20 @@
 // app/layout.tsx
-import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
+import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "HotelPlanner AI QA Dashboard",
-  description: "Executive dashboard for AI agent mistake analysis across HotelPlanner feedback files."
+  description: "Executive AI QA mistake dashboard for HotelPlanner management"
 };
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1
-};
-
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default function RootLayout({
+  children
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className="dark">
+    // IMPORTANT: no dark class here
+    <html lang="en">
       <body>{children}</body>
     </html>
   );
