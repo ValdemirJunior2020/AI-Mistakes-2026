@@ -12,8 +12,8 @@ export const EXCEL_FILES: {
   {
     name: "Reviews-2026.xlsx",
     path: "/data/Reviews-2026.xlsx",
-    label: "Reviews 2026",
-    callCenter: "Reviews / Mixed",
+    label: "HP-Office-feedback",
+    callCenter: "HP-Office-feedback",
     dateRange: "Jan 5, 2026 – May 18, 2026"
   },
   {
@@ -27,7 +27,7 @@ export const EXCEL_FILES: {
     name: "HP AI Feedback.xlsx",
     path: "/data/HP%20AI%20Feedback.xlsx",
     label: "Concentrix feedbacks",
-    callCenter: "Concentrix",
+    callCenter: "Concentrix feedbacks",
     dateRange: "Mar 2026 – May 13, 2026",
     dateNote: "Excludes one old outlier date: Apr 22, 2023"
   }

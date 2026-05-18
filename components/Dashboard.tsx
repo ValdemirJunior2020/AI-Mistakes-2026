@@ -142,7 +142,7 @@ useEffect(() => {
               </div>
               <div className="mt-5 flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
   <h1 className="max-w-5xl text-4xl font-black leading-tight tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-7xl">
-    AI Agent Mistakes Executive Dashboard
+    AI Agent Mistakes  Dashboard
   </h1>
 
   <div className="w-fit rounded-3xl border border-red-300 bg-red-50 px-5 py-4 shadow-sm dark:border-red-500/30 dark:bg-red-500/10">
