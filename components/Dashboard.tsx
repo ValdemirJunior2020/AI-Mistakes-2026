@@ -155,7 +155,7 @@ useEffect(() => {
   </div>
 </div>
               <p className="mt-4 max-w-4xl text-base font-semibold leading-8 text-slate-600 dark:text-slate-300 sm:text-lg">
-                Unified view of AI feedback, Buwelo AI mistakes, and 2026 reviews with clickable charts, executive KPIs, searchable raw data, and Excel export.
+                Unified QA management tracking view of AI mistake feedback coming from Buwelo AI mistakes feedbacks, Concentrix AI mistakes feedback report, and HP-Office feedback report, with clickable charts, QA KPIs, searchable raw data, and Excel export.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {loadedFiles.map((file) => (
