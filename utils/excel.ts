@@ -11,6 +11,15 @@ type WorkbookLoadResult = {
   loadedFiles: string[];
 };
 
+const AI_AGENT_NAMES = [
+  "Jolene Aiagent",
+  "Joeleen Aiagent",
+  "David Aiagent",
+  "Maria Aiagent",
+  "Carmen Aiagent",
+  "Customer Service AI Agents"
+];
+
 const HEADER_ALIASES = {
   timestamp: [
     "timestamp",
@@ -78,6 +87,80 @@ function getValue(row: SheetRow, aliases: string[]): string {
   return "";
 }
 
+function getAllRowText(row: SheetRow): string {
+  return Object.values(row)
+    .map((value) => safeText(value))
+    .join(" ");
+}
+
+function normalizeAiAgentName(value: string): string {
+  const cleaned = safeText(value)
+    .replace(/\s+/g, " ")
+    .replace(/\bAI\s+Agents\b/gi, "AI Agents")
+    .replace(/\bAI\s+Agent\b/gi, "Aiagent")
+    .trim();
+
+  const knownAgent = AI_AGENT_NAMES.find(
+    (agent) => cleaned.toLowerCase() === agent.toLowerCase()
+  );
+
+  if (knownAgent) return knownAgent;
+
+  return cleaned;
+}
+
+function extractAiAgentName(row: SheetRow): string {
+  const blockedWords = [
+    "unknown",
+    "known",
+    "an",
+    "a",
+    "the",
+    "this",
+    "that",
+    "customer",
+    "service",
+    "agent",
+    "ai",
+    "admin",
+    "oliver",
+    "ramos",
+    "nubia"
+  ];
+
+  const allValues = Object.values(row).map((value) => safeText(value));
+  const rowText = getAllRowText(row);
+
+  // 1. First priority: match your official AI agent names anywhere in the row.
+  for (const agent of AI_AGENT_NAMES) {
+    if (rowText.toLowerCase().includes(agent.toLowerCase())) {
+      return agent;
+    }
+  }
+
+  // 2. Second priority: match one-word real names followed by Aiagent / AI Agent.
+  // This avoids names of submitters like Admin Nubia, Oliver, Ramos, etc.
+  for (const value of allValues) {
+    const matches = value.matchAll(
+      /\b([A-Z][a-z]+)\s+(?:AI\s*Agent|AI\s*Agents|Aiagent|Aiagents)\b/gi
+    );
+
+    for (const match of matches) {
+      const possibleName = safeText(match[1]);
+
+      if (!possibleName) continue;
+
+      if (blockedWords.includes(possibleName.toLowerCase())) {
+        continue;
+      }
+
+      return normalizeAiAgentName(`${possibleName} Aiagent`);
+    }
+  }
+
+  return "";
+}
+
 function excelDateToISO(value: unknown): { date: string; rawDate: string } {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     return {
@@ -130,18 +213,27 @@ function inferErrorType(row: SheetRow): string {
   const explicit = getValue(row, HEADER_ALIASES.errorType);
   const concern = `${getValue(row, HEADER_ALIASES.concern)} ${explicit}`.toLowerCase();
 
-  if (explicit && !["corrective", "positive (shout-out)", "feedback"].includes(explicit.toLowerCase())) {
+  if (
+    explicit &&
+    !["corrective", "positive (shout-out)", "feedback"].includes(explicit.toLowerCase())
+  ) {
     return explicit;
   }
 
   if (concern.includes("email")) return "Incorrect Email Address";
+
   if (concern.includes("date") || concern.includes("check in") || concern.includes("check-in")) {
     return "Incorrect Dates";
   }
-  if (concern.includes("location") || concern.includes("city")) return "Incorrect Location";
+
+  if (concern.includes("location") || concern.includes("city")) {
+    return "Incorrect Location";
+  }
+
   if (concern.includes("room") || concern.includes("rooms") || concern.includes("#rooms")) {
     return "Incorrect Room Details";
   }
+
   if (
     concern.includes("hotel direct") ||
     concern.includes("directly") ||
@@ -149,7 +241,11 @@ function inferErrorType(row: SheetRow): string {
   ) {
     return "Misrepresented Hotel Affiliation";
   }
-  if (concern.includes("refund") || concern.includes("cancel")) return "Refund / Cancellation Issue";
+
+  if (concern.includes("refund") || concern.includes("cancel")) {
+    return "Refund / Cancellation Issue";
+  }
+
   if (
     concern.includes("pool") ||
     concern.includes("amenity") ||
@@ -158,24 +254,25 @@ function inferErrorType(row: SheetRow): string {
   ) {
     return "Incorrect Amenity Information";
   }
+
   if (concern.includes("price") || concern.includes("charged") || concern.includes("payment")) {
     return "Billing / Price Issue";
   }
-  if (concern.includes("lead") || concern.includes("request")) return "Group Request Issue";
+
+  if (concern.includes("lead") || concern.includes("request")) {
+    return "Group Request Issue";
+  }
 
   return explicit || "Uncategorized Error";
 }
-
-// utils/excel.ts
 
 function getSourceDisplayName(sourceFile: SourceFileName): string {
   if (sourceFile === "HP AI Feedback.xlsx") return "Concentrix feedbacks";
   if (sourceFile === "AI-MISTAKES-BUWELO (1).xlsx") return "Buwelo AI Mistakes";
   if (sourceFile === "Reviews-2026.xlsx") return "HP-Office-feedback";
+
   return sourceFile;
 }
-
-// utils/excel.ts
 
 function getSourceCallCenter(sourceFile: SourceFileName): string {
   if (sourceFile === "HP AI Feedback.xlsx") return "Concentrix feedbacks";
@@ -186,9 +283,12 @@ function getSourceCallCenter(sourceFile: SourceFileName): string {
 }
 
 function normalizeCallCenter(row: SheetRow, sourceFile: SourceFileName): string {
-  // Everything from HP AI Feedback.xlsx must display as Concentrix feedbacks.
   if (sourceFile === "HP AI Feedback.xlsx") {
     return "Concentrix feedbacks";
+  }
+
+  if (sourceFile === "Reviews-2026.xlsx") {
+    return "HP-Office-feedback";
   }
 
   const rowCallCenter = getValue(row, HEADER_ALIASES.callCenter);
@@ -214,16 +314,17 @@ function normalizeRecord(
   const timestampRaw = timestampKey ? row[timestampKey] : "";
   const { date, rawDate } = excelDateToISO(timestampRaw);
 
-  const agentName = getValue(row, HEADER_ALIASES.agentName);
+  const aiAgentName = extractAiAgentName(row);
+
+  // IMPORTANT:
+  // Only keep records connected to a real AI agent.
+  // This removes submitted-by names and normal human agents from the chart/table.
+  if (!aiAgentName) return null;
+
   const agentEmail = getValue(row, HEADER_ALIASES.agentEmail);
   const concern = getValue(row, HEADER_ALIASES.concern);
   const requestId = getValue(row, HEADER_ALIASES.requestId);
   const itinerary = getValue(row, HEADER_ALIASES.itinerary);
-
-  const hasMeaningfulData = [agentName, agentEmail, concern, requestId, itinerary].some(Boolean);
-  if (!hasMeaningfulData) return null;
-
-  const fallbackAgent = agentName || agentEmail || "Unknown Agent";
   const feedbackType = getValue(row, HEADER_ALIASES.feedbackType);
 
   return {
@@ -234,7 +335,10 @@ function normalizeRecord(
     rowNumber: rowIndex + 2,
     date,
     rawDate,
-    agentName: fallbackAgent,
+
+    // This is the AI agent involved in the mistake, not the person who submitted the feedback.
+    agentName: aiAgentName,
+
     agentEmail,
     callCenter: normalizeCallCenter(row, sourceFile),
     feedbackType: feedbackType || "AI Feedback",
@@ -263,6 +367,7 @@ async function readWorkbook(fileName: SourceFileName, path: string): Promise<QAE
   }
 
   const buffer = await response.arrayBuffer();
+
   const workbook = XLSX.read(buffer, {
     type: "array",
     cellDates: false
@@ -308,8 +413,8 @@ export async function loadAllExcelFiles(): Promise<WorkbookLoadResult> {
 export function exportCombinedWorkbook(records: QAErrorRecord[]): void {
   const rows = records.map((record) => ({
     Date: record.date,
-    "Agent Name": record.agentName,
-    "Agent Email": record.agentEmail,
+    "AI Agent Name": record.agentName,
+    "Submitted By Email": record.agentEmail,
     "Call Center": record.callCenter,
     "Feedback Type": record.feedbackType,
     "Error Type": record.errorType,
